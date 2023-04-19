@@ -71,12 +71,6 @@ public class SimpleServer extends AbstractServer {
 			}else{
 				message.setMessage(request);
 				sendToAllClients(message);
-				//add code here to send received message to all clients.
-				//The string we received in the message is the message we will send back to all clients subscribed.
-				//Example:
-					// message received: "Good morning"
-					// message sent: "Good morning"
-				//see code for changing submitters IDs for help
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
