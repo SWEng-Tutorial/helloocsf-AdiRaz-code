@@ -6,7 +6,10 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SimpleServer extends AbstractServer {
 	private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
@@ -21,15 +24,10 @@ public class SimpleServer extends AbstractServer {
 		Message message = (Message) msg;
 		String request = message.getMessage();
 		try {
-			//we got an empty message, so we will send back an error message with the error details.
 			if (request.isBlank()){
 				message.setMessage("Error! we got an empty message");
 				client.sendToClient(message);
 			}
-			//we got a request to change submitters IDs with the updated IDs at the end of the string, so we save
-			// the IDs at data field in Message entity and send back to all subscribed clients a request to update
-			//their IDs text fields. An example of use of observer design pattern.
-			//message format: "change submitters IDs: 123456789, 987654321"
 			else if(request.startsWith("change submitters IDs:")){
 				message.setData(request.substring(23));
 				message.setMessage("update submitters IDs");
@@ -42,25 +40,37 @@ public class SimpleServer extends AbstractServer {
 				message.setMessage("client added successfully");
 				client.sendToClient(message);
 			}
-			//we got a message from client requesting to echo Hello, so we will send back to client Hello world!
 			else if(request.startsWith("echo Hello")){
 				message.setMessage("Hello World!");
 				client.sendToClient(message);
 			}
 			else if(request.startsWith("send Submitters IDs")){
-				//add code here to send submitters IDs to client
+				message.setMessage("206875874, 208774315");
+				client.sendToClient(message);
 			}
 			else if (request.startsWith("send Submitters")){
-				//add code here to send submitters names to client
+				message.setMessage("Adi, Yoav");
+				client.sendToClient(message);
 			}
 			else if (request.equals("what’s the time?")) {
-				//add code here to send the time to client
+				String time = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
+				message.setMessage(time);
+				client.sendToClient(message);
 			}
 			else if (request.startsWith("multiply")){
-				//add code here to multiply 2 numbers received in the message and send result back to client
-				//(use substring method as shown above)
-				//message format: "multiply n*m"
+				Pattern pattern = Pattern.compile("\\d+"); // match one or more digits
+				Matcher matcher = pattern.matcher(request);
+				int[] numbers = new int[2];
+				int count = 0;
+				while (matcher.find() && count < 2) {
+					numbers[count++] = Integer.parseInt(matcher.group());
+				}
+				int x = numbers[0]*numbers[1];
+				message.setMessage(String.valueOf(x));
+				client.sendToClient(message);
 			}else{
+				message.setMessage(request);
+				sendToAllClients(message);
 				//add code here to send received message to all clients.
 				//The string we received in the message is the message we will send back to all clients subscribed.
 				//Example:
